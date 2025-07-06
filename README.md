@@ -17,11 +17,25 @@ shared-layouts/
 
 ## Installation as Git Submodule
 
-To add this repository as a submodule to your Eleventy project:
+### Option 1: Root-level _includes (Traditional Eleventy Structure)
+
+If your Eleventy project has `_includes` at the root level:
 
 ```bash
 # Add the submodule
-git submodule add https://github.com/your-username/shared-layouts.git _includes/shared
+git submodule add https://github.com/developing-apologist/shared-layouts.git _includes/shared
+
+# Initialize and update the submodule
+git submodule update --init --recursive
+```
+
+### Option 2: src-based Structure (Modern Eleventy Structure)
+
+If your Eleventy project uses a `src` directory structure:
+
+```bash
+# Add the submodule
+git submodule add https://github.com/developing-apologist/shared-layouts.git src/_includes/shared
 
 # Initialize and update the submodule
 git submodule update --init --recursive
@@ -31,9 +45,9 @@ git submodule update --init --recursive
 
 ### 1. Update Eleventy Configuration
 
-In your `.eleventy.js` file, add the shared layouts directory to the includes path:
-
+#### For Root-level Structure:
 ```javascript
+// .eleventy.js
 module.exports = function(eleventyConfig) {
   // Add shared layouts to includes path
   eleventyConfig.addPassthroughCopy("_includes/shared/includes");
@@ -57,12 +71,38 @@ module.exports = function(eleventyConfig) {
 };
 ```
 
+#### For src-based Structure:
+```javascript
+// .eleventy.js
+module.exports = function(eleventyConfig) {
+  // Add shared layouts to includes path
+  eleventyConfig.addPassthroughCopy("src/_includes/shared/includes");
+  
+  return {
+    dir: {
+      input: "src",
+      output: "_site",
+      includes: "_includes",
+      layouts: "_layouts"
+    },
+    templateFormats: ["njk", "md", "html"],
+    nunjucksOptions: {
+      // Add shared includes to the search path
+      searchPaths: [
+        "src/_includes",
+        "src/_includes/shared/includes"
+      ]
+    }
+  };
+};
+```
+
 ### 2. Configure Navigation Links
 
-In your Eleventy data file (e.g., `_data/navigation.js`) or front matter, define your navigation links:
+In your Eleventy data file (e.g., `_data/navigation.js` or `src/_data/navigation.js`) or front matter, define your navigation links:
 
 ```javascript
-// _data/navigation.js
+// _data/navigation.js or src/_data/navigation.js
 module.exports = [
   {
     label: "Home",
@@ -89,8 +129,33 @@ module.exports = [
 
 ### 3. Using the Base Layout
 
-In your page templates, extend the base layout:
+#### For Root-level Structure:
+```njk
+---
+layout: shared/layouts/base.njk
+title: "My Page Title"
+description: "Page description for SEO"
+nav_links: navigation
+site_title: "The Developing Apologist"
+logo_image: "/assets/developing-apologist-logo-v2.png"
+logo_alt: "The Developing Apologist"
+show_wip_badge: true
+---
 
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">
+    Welcome to My Site
+  </h1>
+  
+  <p class="text-gray-600">
+    This is my page content.
+  </p>
+</div>
+{% endblock %}
+```
+
+#### For src-based Structure:
 ```njk
 ---
 layout: shared/layouts/base.njk
@@ -118,8 +183,7 @@ show_wip_badge: true
 
 ### 4. Using the Navbar Component Directly
 
-You can also include the navbar component directly in your own layouts:
-
+#### For Root-level Structure:
 ```njk
 {% include "components/navbar.njk" with { 
   nav_links: navigation,
@@ -128,6 +192,50 @@ You can also include the navbar component directly in your own layouts:
   logo_alt: "The Developing Apologist",
   show_wip_badge: true
 } %}
+```
+
+#### For src-based Structure:
+```njk
+{% include "components/navbar.njk" with { 
+  nav_links: navigation,
+  site_title: "The Developing Apologist",
+  logo_image: "/assets/developing-apologist-logo-v2.png",
+  logo_alt: "The Developing Apologist",
+  show_wip_badge: true
+} %}
+```
+
+## Project Structure Examples
+
+### Root-level Structure (Traditional)
+```
+your-eleventy-site/
+├── _includes/
+│   ├── shared/          # ← Submodule here
+│   │   └── includes/
+│   │       ├── components/
+│   │       └── layouts/
+│   └── your-components/
+├── _data/
+├── _layouts/
+├── pages/
+└── .eleventy.js
+```
+
+### src-based Structure (Modern)
+```
+your-eleventy-site/
+├── src/
+│   ├── _includes/
+│   │   ├── shared/      # ← Submodule here
+│   │   │   └── includes/
+│   │   │       ├── components/
+│   │   │       └── layouts/
+│   │   └── your-components/
+│   ├── _data/
+│   ├── _layouts/
+│   └── pages/
+└── .eleventy.js
 ```
 
 ## Navigation Configuration
@@ -258,7 +366,7 @@ To update the shared layouts in your project:
 git submodule update --remote
 
 # Commit the update
-git add _includes/shared
+git add _includes/shared  # or src/_includes/shared for src-based structure
 git commit -m "Update shared layouts submodule"
 ```
 
