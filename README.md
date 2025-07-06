@@ -35,11 +35,13 @@ git submodule update --init --recursive
 In your `.eleventy.js` file:
 
 ```javascript
-const pluginDate = require("@11ty/eleventy-plugin-date");
+const { DateTime } = require("luxon");
 
 module.exports = function(eleventyConfig) {
-  // Add the date plugin for footer component
-  eleventyConfig.addPlugin(pluginDate);
+  // Add Luxon date filter for footer component
+  eleventyConfig.addFilter("date", function(date, format) {
+    return DateTime.fromJSDate(date).toFormat(format);
+  });
   
   // Copy static assets
   eleventyConfig.addPassthroughCopy("src/assets");
@@ -77,24 +79,28 @@ module.exports = function(eleventyConfig) {
 
 ### 2. Install Required Plugin
 
-The footer component uses date formatting. Install the Eleventy date plugin:
+The footer component uses date formatting. Install Luxon directly:
 
 ```bash
-npm install @11ty/eleventy-plugin-date
+npm install luxon
 ```
 
 Then add it to your `.eleventy.js`:
 
 ```javascript
-const pluginDate = require("@11ty/eleventy-plugin-date");
+const { DateTime } = require("luxon");
 
 module.exports = function(eleventyConfig) {
-  // Add the date plugin
-  eleventyConfig.addPlugin(pluginDate);
+  // Add Luxon date filter
+  eleventyConfig.addFilter("date", function(date, format) {
+    return DateTime.fromJSDate(date).toFormat(format);
+  });
   
   // ... rest of your configuration
 };
 ```
+
+**Note:** Luxon provides the date formatting functionality. The `{{ "now" | date("yyyy") }}` filter in the footer component will automatically update the copyright year.
 
 ### 2. Using the Navbar Component
 
@@ -207,7 +213,7 @@ The footer component accepts these variables:
 - `resources_title`: Title for the resources section (default: "Resources")
 - `copyright_text`: Custom copyright text (default: uses site_title)
 
-**Note:** The footer uses `{{ "now" | date("yyyy") }}` for the copyright year, which requires the `@11ty/eleventy-plugin-date` plugin.
+**Note:** The footer uses `{{ "now" | date("yyyy") }}` for the copyright year, which requires Luxon to be installed and configured as a date filter.
 
 #### Link Structure
 The `resources` array should contain objects with:
@@ -376,3 +382,30 @@ To contribute to the shared layouts:
 ## License
 
 This project is licensed under the MIT License.
+
+## Cursor Prompt for Implementation
+
+Here's a ready-to-use Cursor prompt to implement these shared layouts in your Eleventy project:
+
+```
+I want to implement shared layouts for my Eleventy site using a Git submodule. Here's what I need:
+
+1. Add the shared-layouts repository as a Git submodule at `src/_includes/shared`
+2. Install Luxon for date formatting: `npm install luxon`
+3. Update my .eleventy.js configuration to include Luxon date filter and shared layouts
+4. Create a site_data configuration in my layout that includes:
+   - Logo image and alt text
+   - Site title and description
+   - Navigation links with dynamic active state detection
+   - Resources links for the footer
+   - Work in progress badge toggle
+   - Customizable section titles and visibility
+
+The shared layouts include:
+- A responsive navbar component with mobile hamburger menu
+- A footer component with brand section, quick links (using nav data), and resources
+- A base layout that includes both components
+- Custom color scheme using logo-steel, logo-circuit, logo-orange, etc.
+
+Please help me implement this step by step, starting with the Git submodule setup and ending with a working configuration that matches the documentation at https://github.com/developing-apologist/shared-layouts
+```
