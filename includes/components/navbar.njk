@@ -30,7 +30,7 @@
             <div class="hidden md:flex items-center space-x-8">
                 {% for link in nav_links %}
                     <a href="{{ link.href }}" 
-                       class="text-vs-fg hover:text-logo-glow transition-colors duration-200 {% if link.active %}text-logo-blue font-semibold{% endif %}">
+                       class="hover:text-logo-glow transition-colors duration-200 {% if link.active %}text-logo-blue font-semibold{% else %}text-vs-fg{% endif %}">
                         {{ link.label }}
                     </a>
                 {% endfor %}
@@ -69,7 +69,7 @@
                 
                 {% for link in nav_links %}
                     <a href="{{ link.href }}" 
-                       class="block px-3 py-2 text-vs-fg hover:text-logo-glow transition-colors duration-200 {% if link.active %}text-logo-blue font-semibold{% endif %}">
+                       class="block px-3 py-2 hover:text-logo-glow transition-colors duration-200 {% if link.active %}text-logo-blue font-semibold{% else %}text-vs-fg{% endif %}">
                         {{ link.label }}
                     </a>
                 {% endfor %}

@@ -114,8 +114,8 @@ Use this pattern in your layout files for automatic active state detection:
     site_title: "The Developing Apologist",
     show_wip_badge: true,
     nav_links: [
-        { href: "/", label: "Home", active: page.url == "/" },
-        { href: "/about/", label: "About", active: page.url == "/about/" },
+        { href: "/", label: "Home", active: page.url == "/" or page.url == "" },
+        { href: "/about/", label: "About", active: page.url == "/about/" or page.url == "/about" },
         { href: "https://blog.developingapologist.com", label: "Blog", active: false },
         { href: "https://talks.developingapologist.com", label: "Presentations", active: false }
     ]
@@ -152,12 +152,12 @@ Example:
   {
     label: "Home",
     href: "/",
-    active: page.url == "/"  // Dynamic active state detection
+    active: page.url == "/" or page.url == ""  // Handle both with and without trailing slash
   },
   {
     label: "About",
     href: "/about/",
-    active: page.url == "/about/"
+    active: page.url == "/about/" or page.url == "/about"  // Handle both with and without trailing slash
   },
   {
     label: "External Link",
@@ -166,6 +166,33 @@ Example:
   }
 ]
 ```
+
+#### Troubleshooting Active State
+
+If active states aren't working properly, try these debugging steps:
+
+1. **Check the page.url value** by adding this to your template temporarily:
+   ```njk
+   <!-- Debug: Current page URL is "{{ page.url }}" -->
+   ```
+
+2. **Use more robust active detection**:
+   ```njk
+   { 
+     href: "/about/", 
+     label: "About", 
+     active: page.url == "/about/" or page.url == "/about" or page.url.startsWith("/about/")
+   }
+   ```
+
+3. **For blog/talks sites**, you might need to check the current site context:
+   ```njk
+   { 
+     href: "/", 
+     label: "Home", 
+     active: page.url == "/" or page.url == "" or page.url == "/index.html"
+   }
+   ```
 
 ### Footer Component (`footer.njk`)
 
@@ -217,8 +244,8 @@ You can configure both navbar and footer with the same data structure:
     site_description: "Equipping Christian software developers to defend their faith through logical, systematic apologetics that bridges faith and reason.",
     show_wip_badge: true,
     nav_links: [
-        { href: "/", label: "Home", active: page.url == "/" },
-        { href: "/about/", label: "About", active: page.url == "/about/" },
+        { href: "/", label: "Home", active: page.url == "/" or page.url == "" },
+        { href: "/about/", label: "About", active: page.url == "/about/" or page.url == "/about" },
         { href: "https://blog.developingapologist.com", label: "Blog", active: false },
         { href: "https://talks.developingapologist.com", label: "Presentations", active: false }
     ],
