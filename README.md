@@ -1,6 +1,6 @@
 # Shared Layouts for Eleventy
 
-This repository contains reusable layouts and components for Eleventy sites using Nunjucks templating. It's designed to be used as a Git submodule across multiple sites like `blog.developingapologist.com` and `talks.developingapologist.com`.
+This repository contains reusable layouts and components for Eleventy sites using Nunjucks templating. It's designed to be used as a Git submodule across multiple sites like `developingapologist.com`, `blog.developingapologist.com` and `talks.developingapologist.com`.
 
 ## Structure
 
@@ -8,7 +8,8 @@ This repository contains reusable layouts and components for Eleventy sites usin
 shared-layouts/
 ├── includes/
 │   ├── components/
-│   │   └── navbar.njk          # Responsive navigation component
+│   │   ├── navbar.njk          # Responsive navigation component
+│   │   └── footer.njk          # Footer component
 │   └── layouts/
 │       └── base.njk            # Base layout template
 ├── README.md
@@ -17,21 +18,7 @@ shared-layouts/
 
 ## Installation as Git Submodule
 
-### Option 1: Root-level _includes (Traditional Eleventy Structure)
-
-If your Eleventy project has `_includes` at the root level:
-
-```bash
-# Add the submodule
-git submodule add https://github.com/developing-apologist/shared-layouts.git _includes/shared
-
-# Initialize and update the submodule
-git submodule update --init --recursive
-```
-
-### Option 2: src-based Structure (Modern Eleventy Structure)
-
-If your Eleventy project uses a `src` directory structure:
+Add this repository as a submodule to your Eleventy project:
 
 ```bash
 # Add the submodule
@@ -45,47 +32,33 @@ git submodule update --init --recursive
 
 ### 1. Update Eleventy Configuration
 
-#### For Root-level Structure:
-```javascript
-// .eleventy.js
-module.exports = function(eleventyConfig) {
-  // Add shared layouts to includes path
-  eleventyConfig.addPassthroughCopy("_includes/shared/includes");
-  
-  return {
-    dir: {
-      input: ".",
-      output: "_site",
-      includes: "_includes",
-      layouts: "_layouts"
-    },
-    templateFormats: ["njk", "md", "html"],
-    nunjucksOptions: {
-      // Add shared includes to the search path
-      searchPaths: [
-        "_includes",
-        "_includes/shared/includes"
-      ]
-    }
-  };
-};
-```
+In your `.eleventy.js` file:
 
-#### For src-based Structure:
 ```javascript
-// .eleventy.js
 module.exports = function(eleventyConfig) {
+  // Copy static assets
+  eleventyConfig.addPassthroughCopy("src/assets");
+  eleventyConfig.addPassthroughCopy("src/css");
+  eleventyConfig.addPassthroughCopy("CNAME");
+  eleventyConfig.addPassthroughCopy("_redirects");
+  
   // Add shared layouts to includes path
   eleventyConfig.addPassthroughCopy("src/_includes/shared/includes");
-  
+
+  // Watch CSS files for changes
+  eleventyConfig.addWatchTarget("src/css/");
+
   return {
     dir: {
       input: "src",
       output: "_site",
       includes: "_includes",
-      layouts: "_layouts"
+      layouts: "_includes"
     },
     templateFormats: ["njk", "md", "html"],
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",
+    dataTemplateEngine: "njk",
     nunjucksOptions: {
       // Add shared includes to the search path
       searchPaths: [
@@ -97,49 +70,42 @@ module.exports = function(eleventyConfig) {
 };
 ```
 
-### 2. Configure Navigation Links
+### 2. Using the Navbar Component
 
-In your Eleventy data file (e.g., `_data/navigation.js` or `src/_data/navigation.js`) or front matter, define your navigation links:
+Use this pattern in your layout files for automatic active state detection:
 
-```javascript
-// _data/navigation.js or src/_data/navigation.js
-module.exports = [
-  {
-    label: "Home",
-    href: "/",
-    active: false
-  },
-  {
-    label: "About",
-    href: "/about/",
-    active: false
-  },
-  {
-    label: "Blog",
-    href: "https://blog.developingapologist.com",
-    active: false
-  },
-  {
-    label: "Presentations",
-    href: "https://talks.developingapologist.com",
-    active: false
-  }
-];
+```njk
+<!-- Navigation -->
+{% set nav_data = {
+    logo_image: "/assets/developing-apologist-logo-v2.png",
+    logo_alt: "The Developing Apologist",
+    site_title: "The Developing Apologist",
+    show_wip_badge: true,
+    nav_links: [
+        { href: "/", label: "Home", active: page.url == "/" },
+        { href: "/about/", label: "About", active: page.url == "/about/" },
+        { href: "https://blog.developingapologist.com", label: "Blog", active: false },
+        { href: "https://talks.developingapologist.com", label: "Presentations", active: false }
+    ]
+} %}
+
+{% set logo_image = nav_data.logo_image %}
+{% set logo_alt = nav_data.logo_alt %}
+{% set site_title = nav_data.site_title %}
+{% set show_wip_badge = nav_data.show_wip_badge %}
+{% set nav_links = nav_data.nav_links %}
+{% include "shared/includes/components/navbar.njk" %}
 ```
 
 ### 3. Using the Base Layout
 
-#### For Root-level Structure:
+In your page templates:
+
 ```njk
 ---
 layout: shared/layouts/base.njk
 title: "My Page Title"
 description: "Page description for SEO"
-nav_links: navigation
-site_title: "The Developing Apologist"
-logo_image: "/assets/developing-apologist-logo-v2.png"
-logo_alt: "The Developing Apologist"
-show_wip_badge: true
 ---
 
 {% block content %}
@@ -155,93 +121,23 @@ show_wip_badge: true
 {% endblock %}
 ```
 
-#### For src-based Structure:
-```njk
----
-layout: shared/layouts/base.njk
-title: "My Page Title"
-description: "Page description for SEO"
-nav_links: navigation
-site_title: "The Developing Apologist"
-logo_image: "/assets/developing-apologist-logo-v2.png"
-logo_alt: "The Developing Apologist"
-show_wip_badge: true
----
+## Component Configuration
 
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold text-gray-900 mb-6">
-    Welcome to My Site
-  </h1>
-  
-  <p class="text-gray-600">
-    This is my page content.
-  </p>
-</div>
-{% endblock %}
-```
+### Navbar Component (`navbar.njk`)
 
-### 4. Using the Navbar Component Directly
+The navbar component accepts these variables:
 
-#### For Root-level Structure:
-```njk
-{% include "components/navbar.njk" with { 
-  nav_links: navigation,
-  site_title: "The Developing Apologist",
-  logo_image: "/assets/developing-apologist-logo-v2.png",
-  logo_alt: "The Developing Apologist",
-  show_wip_badge: true
-} %}
-```
+#### Required Variables
+- `nav_links`: Array of navigation link objects
 
-#### For src-based Structure:
-```njk
-{% include "components/navbar.njk" with { 
-  nav_links: navigation,
-  site_title: "The Developing Apologist",
-  logo_image: "/assets/developing-apologist-logo-v2.png",
-  logo_alt: "The Developing Apologist",
-  show_wip_badge: true
-} %}
-```
+#### Optional Variables
+- `site_title`: The site title displayed next to the logo (default: "Site Title")
+- `logo_image`: Path to the logo image (if not provided, shows default SVG)
+- `logo_alt`: Alt text for the logo image (default: "Site Logo")
+- `show_wip_badge`: Boolean to show/hide the "Work in Progress" badge (default: false)
 
-## Project Structure Examples
-
-### Root-level Structure (Traditional)
-```
-your-eleventy-site/
-├── _includes/
-│   ├── shared/          # ← Submodule here
-│   │   └── includes/
-│   │       ├── components/
-│   │       └── layouts/
-│   └── your-components/
-├── _data/
-├── _layouts/
-├── pages/
-└── .eleventy.js
-```
-
-### src-based Structure (Modern)
-```
-your-eleventy-site/
-├── src/
-│   ├── _includes/
-│   │   ├── shared/      # ← Submodule here
-│   │   │   └── includes/
-│   │   │       ├── components/
-│   │   │       └── layouts/
-│   │   └── your-components/
-│   ├── _data/
-│   ├── _layouts/
-│   └── pages/
-└── .eleventy.js
-```
-
-## Navigation Configuration
-
-The `nav_links` array should contain objects with the following properties:
-
+#### Navigation Link Structure
+Each link object should contain:
 - `label` (required): The text to display for the link
 - `href` (required): The URL the link should point to
 - `active` (optional): Boolean to indicate if this is the current page
@@ -252,38 +148,100 @@ Example:
   {
     label: "Home",
     href: "/",
-    active: true  // This link will be highlighted
+    active: page.url == "/"  // Dynamic active state detection
   },
   {
     label: "About",
     href: "/about/",
-    active: false
+    active: page.url == "/about/"
+  },
+  {
+    label: "External Link",
+    href: "https://example.com",
+    active: false  // External links should be false
   }
 ]
 ```
 
-## Navbar Configuration Options
+### Footer Component (`footer.njk`)
 
-The navbar component accepts several configuration options:
+The footer component accepts these variables:
 
-### Required Variables
-- `nav_links`: Array of navigation link objects (see above)
-
-### Optional Variables
+#### Optional Variables
 - `site_title`: The site title displayed next to the logo (default: "Site Title")
 - `logo_image`: Path to the logo image (if not provided, shows default SVG)
 - `logo_alt`: Alt text for the logo image (default: "Site Logo")
+- `site_description`: Description text displayed under the logo
 - `show_wip_badge`: Boolean to show/hide the "Work in Progress" badge (default: false)
+- `nav_links`: Array of navigation links (used for quick links section)
+- `show_quick_links`: Boolean to show/hide the quick links section (default: true)
+- `quick_links_title`: Title for the quick links section (default: "Quick Links")
+- `resources`: Array of resource link objects
+- `show_resources`: Boolean to show/hide the resources section (default: true)
+- `resources_title`: Title for the resources section (default: "Resources")
+- `copyright_text`: Custom copyright text (default: uses site_title)
 
-### Example Configuration
+#### Link Structure
+The `resources` array should contain objects with:
+- `label` (required): The text to display for the link
+- `href` (required): The URL the link should point to
+
+Example:
+```javascript
+{
+  resources: [
+    { href: "https://blog.example.com", label: "Developer Blog" },
+    { href: "https://talks.example.com", label: "Presentations" }
+  ]
+}
+```
+
+**Note:** Quick links automatically use the same `nav_links` data as the navbar component.
+
+## Using Both Components Together
+
+You can configure both navbar and footer with the same data structure:
+
 ```njk
-{% include "components/navbar.njk" with { 
-  nav_links: navigation,
-  site_title: "The Developing Apologist",
-  logo_image: "/assets/developing-apologist-logo-v2.png",
-  logo_alt: "The Developing Apologist",
-  show_wip_badge: true
+<!-- Navigation and Footer Configuration -->
+{% set site_data = {
+    logo_image: "/assets/developing-apologist-logo-v2.png",
+    logo_alt: "The Developing Apologist",
+    site_title: "The Developing Apologist",
+    site_description: "Equipping Christian software developers to defend their faith through logical, systematic apologetics that bridges faith and reason.",
+    show_wip_badge: true,
+    nav_links: [
+        { href: "/", label: "Home", active: page.url == "/" },
+        { href: "/about/", label: "About", active: page.url == "/about/" },
+        { href: "https://blog.developingapologist.com", label: "Blog", active: false },
+        { href: "https://talks.developingapologist.com", label: "Presentations", active: false }
+    ],
+    resources: [
+        { href: "https://blog.developingapologist.com", label: "Developer Apologetics Blog" },
+        { href: "https://talks.developingapologist.com", label: "Technical Presentations" }
+    ],
+    quick_links_title: "Quick Links",
+    resources_title: "Resources",
+    show_quick_links: true,
+    show_resources: true
 } %}
+
+<!-- Set variables for components -->
+{% set logo_image = site_data.logo_image %}
+{% set logo_alt = site_data.logo_alt %}
+{% set site_title = site_data.site_title %}
+{% set site_description = site_data.site_description %}
+{% set show_wip_badge = site_data.show_wip_badge %}
+{% set nav_links = site_data.nav_links %}
+{% set resources = site_data.resources %}
+{% set quick_links_title = site_data.quick_links_title %}
+{% set resources_title = site_data.resources_title %}
+{% set show_quick_links = site_data.show_quick_links %}
+{% set show_resources = site_data.show_resources %}
+
+<!-- Include components -->
+{% include "shared/includes/components/navbar.njk" %}
+{% include "shared/includes/components/footer.njk" %}
 ```
 
 ## Features
@@ -298,19 +256,27 @@ The navbar component accepts several configuration options:
 - ✅ Smooth transitions and hover effects
 - ✅ Sticky positioning with z-index
 
+### Footer Component (`footer.njk`)
+- ✅ Responsive grid layout
+- ✅ Brand section with logo and description
+- ✅ Configurable quick links section
+- ✅ Configurable resources section
+- ✅ Optional "Work in Progress" badge
+- ✅ Dynamic copyright year
+- ✅ Consistent styling with navbar
+
 ### Base Layout (`base.njk`)
-- ✅ Includes the navbar component
+- ✅ Includes both navbar and footer components
 - ✅ Tailwind CSS integration
 - ✅ SEO meta tags support
 - ✅ Open Graph tags
 - ✅ Content block for page-specific content
-- ✅ Footer with dynamic year
 - ✅ Additional head and scripts blocks
 
 ## Customization
 
 ### Custom Color Scheme
-The navbar uses custom CSS variables for colors. Make sure your site includes these CSS custom properties:
+Both components use custom CSS variables for colors. Make sure your site includes these CSS custom properties:
 
 ```css
 :root {
@@ -344,18 +310,18 @@ module.exports = {
 ```
 
 ### Replacing the Logo
-Set the `logo_image` and `logo_alt` variables when including the navbar:
+Update the `logo_image` and `logo_alt` in your site_data:
 
 ```njk
-{% include "components/navbar.njk" with { 
-  nav_links: navigation,
-  logo_image: "/images/your-logo.png",
-  logo_alt: "Your Site Name"
+{% set site_data = {
+    logo_image: "/images/your-logo.png",
+    logo_alt: "Your Site Name",
+    // ... other options
 } %}
 ```
 
 ### Customizing the Work in Progress Badge
-To show the badge, set `show_wip_badge: true`. To hide it, either omit the variable or set it to `false`.
+To show the badge, set `show_wip_badge: true` in your site_data. To hide it, set it to `false`.
 
 ## Updating the Submodule
 
@@ -366,7 +332,7 @@ To update the shared layouts in your project:
 git submodule update --remote
 
 # Commit the update
-git add _includes/shared  # or src/_includes/shared for src-based structure
+git add src/_includes/shared
 git commit -m "Update shared layouts submodule"
 ```
 
