@@ -35,7 +35,12 @@ git submodule update --init --recursive
 In your `.eleventy.js` file:
 
 ```javascript
+const pluginDate = require("@11ty/eleventy-plugin-date");
+
 module.exports = function(eleventyConfig) {
+  // Add the date plugin for footer component
+  eleventyConfig.addPlugin(pluginDate);
+  
   // Copy static assets
   eleventyConfig.addPassthroughCopy("src/assets");
   eleventyConfig.addPassthroughCopy("src/css");
@@ -67,6 +72,27 @@ module.exports = function(eleventyConfig) {
       ]
     }
   };
+};
+```
+
+### 2. Install Required Plugin
+
+The footer component uses date formatting. Install the Eleventy date plugin:
+
+```bash
+npm install @11ty/eleventy-plugin-date
+```
+
+Then add it to your `.eleventy.js`:
+
+```javascript
+const pluginDate = require("@11ty/eleventy-plugin-date");
+
+module.exports = function(eleventyConfig) {
+  // Add the date plugin
+  eleventyConfig.addPlugin(pluginDate);
+  
+  // ... rest of your configuration
 };
 ```
 
@@ -180,6 +206,8 @@ The footer component accepts these variables:
 - `show_resources`: Boolean to show/hide the resources section (default: true)
 - `resources_title`: Title for the resources section (default: "Resources")
 - `copyright_text`: Custom copyright text (default: uses site_title)
+
+**Note:** The footer uses `{{ "now" | date("yyyy") }}` for the copyright year, which requires the `@11ty/eleventy-plugin-date` plugin.
 
 #### Link Structure
 The `resources` array should contain objects with:
