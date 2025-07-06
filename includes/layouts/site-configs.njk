@@ -1,0 +1,78 @@
+{# Site Configuration Examples for Unified Base Layout #}
+
+{# Website Site Configuration #}
+{% macro website_config() %}
+{% set site_data = {
+    logo_image: "/assets/developing-apologist-logo-v2.png",
+    logo_alt: "The Developing Apologist",
+    site_title: "The Developing Apologist",
+    show_wip_badge: true,
+    nav_links: [
+        { href: "/", label: "Home", active: page.url == "/" },
+        { href: "/about/", label: "About", active: page.url == "/about/" },
+        { href: "https://blog.developingapologist.com", label: "Blog", active: false },
+        { href: "https://talks.developingapologist.com", label: "Presentations", active: false }
+    ],
+    site_description: "Equipping Christian software developers to defend their faith through logical, systematic apologetics that bridges faith and reason.",
+    quick_links_title: "Quick Links",
+    show_quick_links: true,
+    show_resources: false
+} %}
+{{ site_data | json }}
+{% endmacro %}
+
+{# Blog Site Configuration #}
+{% macro blog_config() %}
+{% set site_data = {
+    logo_image: "/assets/developing-apologist-logo-v2.png",
+    logo_alt: "The Developing Apologist",
+    site_title: "The Developing Apologist",
+    show_wip_badge: true,
+    nav_links: [
+        { href: "/", label: "Home", active: page.url == "/" },
+        { href: "/about/", label: "About", active: page.url == "/about/" },
+        { href: "https://blog.developingapologist.com", label: "Blog", active: true },
+        { href: "https://talks.developingapologist.com", label: "Presentations", active: false }
+    ],
+    site_description: "Equipping Christian software developers to defend their faith through logical, systematic apologetics that bridges faith and reason.",
+    quick_links_title: "Quick Links",
+    show_quick_links: true,
+    show_resources: true,
+    resources: [
+        { href: "/feed.xml", label: "RSS Feed" },
+        { href: "/tags/", label: "All Tags" },
+        { href: "/categories/", label: "Categories" }
+    ]
+} %}
+{{ site_data | json }}
+{% endmacro %}
+
+{# Talks Site Configuration #}
+{% macro talks_config() %}
+{% set site_data = {
+    logo_image: "/assets/developing-apologist-logo-v2.png",
+    logo_alt: "The Developing Apologist",
+    site_title: "The Developing Apologist",
+    show_wip_badge: true,
+    nav_links: [
+        { href: "/", label: "Home", active: page.url == "/" },
+        { href: "/about/", label: "About", active: page.url == "/about/" },
+        { href: "https://blog.developingapologist.com", label: "Blog", active: false },
+        { href: "https://talks.developingapologist.com", label: "Presentations", active: true }
+    ],
+    site_description: "Equipping Christian software developers to defend their faith through logical, systematic apologetics that bridges faith and reason.",
+    quick_links_title: "Quick Links",
+    show_quick_links: true,
+    show_resources: false,
+    quick_links: [
+        { href: "/talks/", label: "All Talks" },
+        { href: "https://developingapologist.com", label: "Main Site" },
+        { href: "https://blog.developingapologist.com", label: "Blog" }
+    ],
+    social_links: [
+        { href: "https://github.com/Developing-Apologist", label: "GitHub" },
+        { href: "https://twitter.com/devapologist", label: "Twitter" }
+    ]
+} %}
+{{ site_data | json }}
+{% endmacro %} 

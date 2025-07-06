@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if title %}{{ title }}{% else %}My Site{% endif %}</title>
+    <title>{% if title %}{{ title }}{% else %}{{ site_data.site_title | default("The Developing Apologist") }}{% endif %}</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,6 +24,8 @@
     <!-- Meta tags -->
     {% if description %}
     <meta name="description" content="{{ description }}">
+    {% elif site_data.site_description %}
+    <meta name="description" content="{{ site_data.site_description }}">
     {% endif %}
     
     {% if keywords %}
@@ -37,10 +39,14 @@
     
     {% if description %}
     <meta property="og:description" content="{{ description }}">
+    {% elif site_data.site_description %}
+    <meta property="og:description" content="{{ site_data.site_description }}">
     {% endif %}
     
     {% if og_image %}
     <meta property="og:image" content="{{ og_image }}">
+    {% elif site_data.logo_image %}
+    <meta property="og:image" content="{{ site_data.logo_image }}">
     {% endif %}
     
     <!-- Additional head content -->
@@ -48,8 +54,13 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
-    {% if nav_links %}
-        {% include "components/navbar.njk" with { nav_links: nav_links } %}
+    {% if site_data.nav_links %}
+        {% set nav_links = site_data.nav_links %}
+        {% set logo_image = site_data.logo_image %}
+        {% set logo_alt = site_data.logo_alt %}
+        {% set site_title = site_data.site_title %}
+        {% set show_wip_badge = site_data.show_wip_badge %}
+        {% include "components/navbar.njk" %}
     {% endif %}
     
     <!-- Main content -->
@@ -60,7 +71,17 @@
     </main>
     
     <!-- Footer -->
-    {% include "components/footer.njk" %}
+    {% if site_data %}
+        {% set site_description = site_data.site_description %}
+        {% set resources = site_data.resources %}
+        {% set quick_links_title = site_data.quick_links_title %}
+        {% set resources_title = site_data.resources_title %}
+        {% set show_quick_links = site_data.show_quick_links %}
+        {% set show_resources = site_data.show_resources %}
+        {% set quick_links = site_data.quick_links %}
+        {% set social_links = site_data.social_links %}
+        {% include "components/footer.njk" %}
+    {% endif %}
     
     <!-- Additional scripts -->
     {% block scripts %}{% endblock %}

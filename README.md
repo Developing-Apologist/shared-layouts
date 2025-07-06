@@ -11,7 +11,8 @@ shared-layouts/
 │   │   ├── navbar.njk          # Responsive navigation component
 │   │   └── footer.njk          # Footer component
 │   └── layouts/
-│       └── base.njk            # Base layout template
+│       ├── base.njk            # Unified base layout template
+│       ├── site-configs.njk    # Site configuration macros
 ├── README.md
 └── .eleventyignore
 ```
@@ -102,13 +103,22 @@ module.exports = function(eleventyConfig) {
 
 **Note:** Luxon provides the date formatting functionality. The `{{ "now" | date("yyyy") }}` filter in the footer component will automatically update the copyright year.
 
-### 2. Using the Navbar Component
+## Unified Base Layout
 
-Use this pattern in your layout files for automatic active state detection:
+The `base.njk` layout provides a unified, data-driven approach for all your sites. It uses a `site_data` object to configure navigation, footer, and metadata.
+
+### Features
+
+- **Data-driven configuration**: Uses a `site_data` object to configure navigation, footer, and metadata
+- **Flexible metadata**: Supports both page-level and site-level metadata
+- **Component-based**: Uses shared navbar and footer components
+
+### Usage
+
+Set up your `site_data` object in your page or layout:
 
 ```njk
-<!-- Navigation -->
-{% set nav_data = {
+{% set site_data = {
     logo_image: "/assets/developing-apologist-logo-v2.png",
     logo_alt: "The Developing Apologist",
     site_title: "The Developing Apologist",
@@ -118,57 +128,116 @@ Use this pattern in your layout files for automatic active state detection:
         { href: "/about/", label: "About", active: page.url == "/about/" },
         { href: "https://blog.developingapologist.com", label: "Blog", active: false },
         { href: "https://talks.developingapologist.com", label: "Presentations", active: false }
-    ]
+    ],
+    site_description: "Equipping Christian software developers to defend their faith through logical, systematic apologetics that bridges faith and reason.",
+    quick_links_title: "Quick Links",
+    show_quick_links: true,
+    show_resources: false
 } %}
 
-{% set logo_image = nav_data.logo_image %}
-{% set logo_alt = nav_data.logo_alt %}
-{% set site_title = nav_data.site_title %}
-{% set show_wip_badge = nav_data.show_wip_badge %}
-{% set nav_links = nav_data.nav_links %}
-{% include "shared/includes/components/navbar.njk" %}
+{% extends "shared/layouts/base.njk" %}
 ```
 
-### 3. Using the Base Layout
+### Site Data Configuration
 
-In your page templates:
+The `site_data` object supports the following properties:
+
+#### Required Properties
+- `site_title`: The main site title
+- `nav_links`: Array of navigation links
+
+#### Optional Properties
+- `logo_image`: Path to the logo image
+- `logo_alt`: Alt text for the logo
+- `show_wip_badge`: Whether to show the "Work in Progress" badge
+- `site_description`: Site description for meta tags
+- `quick_links_title`: Title for the quick links section
+- `show_quick_links`: Whether to show quick links in footer
+- `show_resources`: Whether to show resources in footer
+- `resources`: Array of resource links
+- `quick_links`: Array of quick links for footer
+- `social_links`: Array of social media links
+
+### Page-Level Overrides
+
+You can override site-level settings with page-level variables:
 
 ```njk
 ---
-layout: shared/layouts/base.njk
-title: "My Page Title"
-description: "Page description for SEO"
+title: "Custom Page Title"
+description: "Custom page description"
+og_image: "/custom-og-image.jpg"
 ---
 
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold text-gray-900 mb-6">
-    Welcome to My Site
-  </h1>
-  
-  <p class="text-gray-600">
-    This is my page content.
-  </p>
-</div>
-{% endblock %}
+{% extends "shared/layouts/base.njk" %}
 ```
 
-## Component Configuration
+## Site Configuration Macros
 
-### Navbar Component (`navbar.njk`)
+The `site-configs.njk` file contains Nunjucks macros that provide ready-to-use configurations for each of your sites.
+
+### What are Macros?
+
+Nunjucks macros are reusable template functions. In this case, they serve as **configuration templates** that you can either copy directly or import and use programmatically.
+
+### Available Macros
+
+#### `website_config()`
+Configuration for the main website with about page and external links.
+
+#### `blog_config()`
+Configuration for the blog site with RSS feed and tag/category resources.
+
+#### `talks_config()`
+Configuration for the talks/presentations site with social links and talk-specific quick links.
+
+### How to Use the Macros
+
+**Option 1: Import and Call**
+```njk
+{% from "shared/layouts/site-configs.njk" import website_config %}
+{% set site_data = website_config() %}
+{% extends "shared/layouts/base.njk" %}
+```
+
+**Option 2: Copy the Configuration**
+```njk
+{% set site_data = {
+    logo_image: "/assets/developing-apologist-logo-v2.png",
+    site_title: "The Developing Apologist",
+    nav_links: [...]
+} %}
+{% extends "shared/layouts/base.njk" %}
+```
+
+### Key Differences Between Site Configurations
+
+| Site | Active Nav | Resources | Quick Links | Social Links |
+|------|------------|-----------|-------------|--------------|
+| **Website** | Home/About | ❌ | Basic | ❌ |
+| **Blog** | Blog | ✅ RSS/Tags/Categories | Basic | ❌ |
+| **Talks** | Presentations | ❌ | Talk-specific | ✅ GitHub/Twitter |
+
+## Legacy Component Usage
+
+### Using Individual Components
+
+You can still use the navbar and footer components individually if needed:
+
+#### Navbar Component (`navbar.njk`)
 
 The navbar component accepts these variables:
 
-#### Required Variables
+##### Required Variables
 - `nav_links`: Array of navigation link objects
 
-#### Optional Variables
+##### Optional Variables
 - `site_title`: The site title displayed next to the logo (default: "Site Title")
 - `logo_image`: Path to the logo image (if not provided, shows default SVG)
 - `logo_alt`: Alt text for the logo image (default: "Site Logo")
 - `show_wip_badge`: Boolean to show/hide the "Work in Progress" badge (default: false)
 
-#### Navigation Link Structure
+##### Navigation Link Structure
 Each link object should contain:
 - `label` (required): The text to display for the link
 - `href` (required): The URL the link should point to
@@ -195,11 +264,11 @@ Example:
 ]
 ```
 
-### Footer Component (`footer.njk`)
+#### Footer Component (`footer.njk`)
 
 The footer component accepts these variables:
 
-#### Optional Variables
+##### Optional Variables
 - `site_title`: The site title displayed next to the logo (default: "Site Title")
 - `logo_image`: Path to the logo image (if not provided, shows default SVG)
 - `logo_alt`: Alt text for the logo image (default: "Site Logo")
@@ -215,7 +284,7 @@ The footer component accepts these variables:
 
 **Note:** The footer uses `{{ "now" | date("yyyy") }}` for the copyright year, which requires Luxon to be installed and configured as a date filter.
 
-#### Link Structure
+##### Link Structure
 The `resources` array should contain objects with:
 - `label` (required): The text to display for the link
 - `href` (required): The URL the link should point to
@@ -232,7 +301,7 @@ Example:
 
 **Note:** Quick links automatically use the same `nav_links` data as the navbar component.
 
-## Using Both Components Together
+### Using Both Components Together
 
 You can configure both navbar and footer with the same data structure:
 
@@ -300,12 +369,25 @@ You can configure both navbar and footer with the same data structure:
 - ✅ Consistent styling with navbar
 
 ### Base Layout (`base.njk`)
+- ✅ Unified data-driven configuration
 - ✅ Includes both navbar and footer components
 - ✅ Tailwind CSS integration
 - ✅ SEO meta tags support
 - ✅ Open Graph tags
 - ✅ Content block for page-specific content
 - ✅ Additional head and scripts blocks
+
+## Migration Guide
+
+### From Website Layout
+1. Replace the hardcoded `site_data` object with your configuration
+2. Update the layout path to use the shared layout
+3. Remove any duplicate navbar/footer includes
+
+### From Blog/Talks Layout
+1. Create a `site_data` object with your site configuration
+2. Update the layout path to use the shared layout
+3. Move hardcoded navigation to the `nav_links` array
 
 ## Customization
 
@@ -402,9 +484,10 @@ I want to implement shared layouts for my Eleventy site using a Git submodule. H
    - Customizable section titles and visibility
 
 The shared layouts include:
+- A unified base layout with data-driven configuration
+- Site configuration macros for easy setup
 - A responsive navbar component with mobile hamburger menu
 - A footer component with brand section, quick links (using nav data), and resources
-- A base layout that includes both components
 - Custom color scheme using logo-steel, logo-circuit, logo-orange, etc.
 
 Please help me implement this step by step, starting with the Git submodule setup and ending with a working configuration that matches the documentation at https://github.com/developing-apologist/shared-layouts
