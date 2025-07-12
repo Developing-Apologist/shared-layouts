@@ -40,6 +40,7 @@
             return;
         }
 
+        // Create script element
         const script = document.createElement('script');
         script.src = 'https://giscus.app/client.js';
         script.setAttribute('data-repo', giscusConfig.repo);
@@ -60,6 +61,16 @@
         script.onerror = function() {
             console.warn('Failed to load giscus script, retrying in 2 seconds...');
             setTimeout(loadGiscus, 2000);
+        };
+        
+        // Add load event to ensure giscus is properly initialized
+        script.onload = function() {
+            // Force giscus to reload if it doesn't appear
+            setTimeout(() => {
+                if (window.giscus && typeof window.giscus.loadGiscusDiscussion === 'function') {
+                    window.giscus.loadGiscusDiscussion();
+                }
+            }, 1000);
         };
         
         document.head.appendChild(script);
