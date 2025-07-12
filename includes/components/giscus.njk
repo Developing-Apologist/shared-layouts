@@ -1,32 +1,33 @@
 <!-- Giscus Comments -->
 <div class="giscus-container mt-12 pt-8 border-t border-border-color">
     <div class="giscus" 
-         data-repo="Developing-Apologist/blog" 
-         data-repo-id="1014407656" 
-         data-category="Blog Comments" 
-         data-category-id="{{ giscusCategoryId | default('DEFAULT_CATEGORY_ID') }}" 
-         data-mapping="pathname" 
-         data-strict="0" 
-         data-reactions-enabled="1" 
-         data-emit-metadata="0" 
-         data-input-position="top" 
-         data-theme="dark" 
-         data-lang="en" 
-         data-loading="lazy">
+         data-repo="Developing-Apologist/blog"
+        data-repo-id="R_kgDOPHah6A"
+        data-category="Blog Comments"
+        data-category-id="DIC_kwDOPHah6M4Cs154"
+        data-mapping="title"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="1"
+        data-input-position="top"
+        data-theme="dark"
+        data-lang="en"
+        data-loading="lazy"
+        crossorigin="anonymous">
     </div>
 </div>
 
 <script>
-    // Giscus configuration with dynamic category support
+    // Giscus configuration with single category for all blog comments
     const giscusConfig = {
         repo: 'Developing-Apologist/blog',
-        repoId: '1014407656',
+        repoId: 'R_kgDOPHah6A',
         category: 'Blog Comments',
-        categoryId: '{{ giscusCategoryId | default("DEFAULT_CATEGORY_ID") }}',
-        mapping: 'pathname',
+        categoryId: 'DIC_kwDOPHah6M4Cs154', // Replace with actual category ID from GitHub
+        mapping: 'title',
         strict: '0',
         reactionsEnabled: '1',
-        emitMetadata: '0',
+        emitMetadata: '1',
         inputPosition: 'top',
         theme: 'dark',
         lang: 'en',
