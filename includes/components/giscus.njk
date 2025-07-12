@@ -12,8 +12,7 @@
         data-input-position="top"
         data-theme="dark"
         data-lang="en"
-        data-loading="lazy"
-        crossorigin="anonymous">
+        data-loading="lazy">
     </div>
 </div>
 
@@ -23,7 +22,7 @@
         repo: 'Developing-Apologist/blog',
         repoId: 'R_kgDOPHah6A',
         category: 'Blog Comments',
-        categoryId: 'DIC_kwDOPHah6M4Cs154', // Replace with actual category ID from GitHub
+        categoryId: 'DIC_kwDOPHah6M4Cs154',
         mapping: 'title',
         strict: '0',
         reactionsEnabled: '1',
@@ -34,8 +33,13 @@
         loading: 'lazy'
     };
 
-    // Load Giscus script
+    // Load Giscus script with error handling and retry logic
     function loadGiscus() {
+        // Check if giscus is already loaded
+        if (window.giscus) {
+            return;
+        }
+
         const script = document.createElement('script');
         script.src = 'https://giscus.app/client.js';
         script.setAttribute('data-repo', giscusConfig.repo);
@@ -50,8 +54,13 @@
         script.setAttribute('data-theme', giscusConfig.theme);
         script.setAttribute('data-lang', giscusConfig.lang);
         script.setAttribute('data-loading', giscusConfig.loading);
-        script.crossOrigin = 'anonymous';
         script.async = true;
+        
+        // Add error handling
+        script.onerror = function() {
+            console.warn('Failed to load giscus script, retrying in 2 seconds...');
+            setTimeout(loadGiscus, 2000);
+        };
         
         document.head.appendChild(script);
     }
